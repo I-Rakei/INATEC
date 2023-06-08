@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Editable Table Example</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <style>
+    table {
+      width: 100%;
+    }
+    th, td {
+      padding: 8px;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    td[contenteditable="true"] {
+      background-color: #fffacd;
+    }
+    table, th, td {
+      border: 1px solid black;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="mt-4 mb-4">Editable Table Example</h1>
+  
+    <table id="myTable">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Módulo</th>
+          <th>Completo</th>
+          <th>Ação</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td contenteditable="true"></td>
+          <td contenteditable="true"></td>
+          <td contenteditable="true"></td>
+          <td><button class="btn btn-danger delete-row">Delete Row</button></td>
+        </tr>
+        <tr>
+          <td contenteditable="true"></td>
+          <td contenteditable="true"></td>
+          <td contenteditable="true"></td>
+          <td><button class="btn btn-danger delete-row">Delete Row</button></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <button id="addRowBtn" class="btn btn-primary mt-4">Add Row</button>
+    <button id="saveBtn" class="btn btn-success mt-4">Save Data</button>
+  </div>
+
+  <script>
+    // Get the table element
+    const table = document.getElementById("myTable");
+
+    // Add event listeners to enable editing on table cells
+    for (let i = 0; i < table.rows.length; i++) {
+      for (let j = 0; j < table.rows[i].cells.length - 1; j++) {
+        table.rows[i].cells[j].addEventListener("input", function() {
+          // Save the updated value to your data source or perform other operations
+          console.log("Updated value: ", this.textContent);
+        });
+      }
+    }
+
+    // Add event listener to the "Add Row" button
+    const addRowBtn = document.getElementById("addRowBtn");
+    addRowBtn.addEventListener("click", function() {
+      const newRow = table.insertRow(table.rows.length - 1);
+      const cell1 = newRow.insertCell(0);
+      const cell2 = newRow.insertCell(1);
+      const cell3 = newRow.insertCell(2);
+      const cell4 = newRow.insertCell(3);
+      cell1.contentEditable = "true";
+      cell2.contentEditable = "true";
+      cell3.contentEditable = "true";
+      cell4.innerHTML = '<button class="btn btn-danger delete-row">Delete Row</button>';
+      addDeleteRowEventListeners();
+    });
+
+    // Function to add event listeners to delete row buttons
+    function addDeleteRowEventListeners() {
+      const deleteRowButtons = document.getElementsByClassName("delete-row");
+      for (let i = 0; i < deleteRowButtons.length; i++) {
+        deleteRowButtons[i].addEventListener("click", function() {
+          const row = this.closest("tr");
+          if (table.rows.length > 2) {
+            row.parentNode.removeChild(row);
+          } else {
+            clearRow(row);
+          }
+        });
+      }
+    }
+
+    // Function to clear the content of the row
+    function clearRow(row) {
+      const cells = row.getElementsByTagName("td");
+      for (let i = 0; i < cells.length - 1; i++) {
+        cells[i].textContent = "";
+      }
+    }
+
+    // Add initial event listeners to delete row buttons
+    addDeleteRowEventListeners();
+
+    // Add event listener to the "Save Data" button
+    const saveBtn = document.getElementById("saveBtn");
+    saveBtn.addEventListener("click", function() {
+      const rows = table.rows;
+
+      let csvContent = "data:text/csv;charset=utf-8,";
+
+      // Loop through each row of the table
+      for (let i = 0; i < rows.length; i++) {
+        const cells = rows[i].cells;
+        let row = [];
+
+        // Loop through each cell of the row
+        for (let j = 0; j < cells.length - 1; j++) {
+          row.push(cells[j].textContent);
+        }
+
+        // Join the row data with commas
+        let rowString = row.join(",");
+        csvContent += rowString + "\n";
+      }
+
+      // Create a temporary link element to download the CSV file
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "table_data.csv");
+      document.body.appendChild(link);
+      link.click();
+    });
+  </script>
+</body>
+</html>
